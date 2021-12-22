@@ -1,27 +1,38 @@
 <script setup>
-import { Button } from "vant";
+import { Button, Skeleton } from "vant";
+import { reactive, toRefs, onMounted } from "vue";
+
+const state = reactive({
+  loading: false,
+});
+
+onMounted(() => {
+  console.log('nimabibib')
+})
 </script>
 
 <template>
-  <div class="user-list">
-    <div class="list-item">
-      <div class="each-item">
-        <span>户号：</span>
-        <span>123456789</span>
-      </div>
-      <div class="each-item">
-        <span>户名：</span>
-        <span>321321321</span>
-      </div>
-      <div class="each-item">
-        <span>地址：</span>
-        <span>杭州市三川国德</span>
-      </div>
-      <div class="each-btn">
-        <Button type="success">下一步</Button>
+  <Skeleton :row="6" :loading="state.loading" avatar>
+    <div class="user-list">
+      <div class="list-item">
+        <div class="each-item">
+          <span>户号：</span>
+          <span>123456789</span>
+        </div>
+        <div class="each-item">
+          <span>户名：</span>
+          <span>321321321</span>
+        </div>
+        <div class="each-item">
+          <span>地址：</span>
+          <span>杭州市三川国德</span>
+        </div>
+        <div class="each-btn">
+          <Button type="success">下一步</Button>
+        </div>
       </div>
     </div>
-  </div>
+  </Skeleton>
 </template>
 
 <style lang="scss">

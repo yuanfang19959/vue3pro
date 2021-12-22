@@ -1,26 +1,25 @@
 <template>
-  <div class="text">hello</div>
-  <button @click="kkp">点击</button>
+    <div class="form">
+      
+    </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      color: 'red'
-    }
-  },
-  methods:{
-   kkp() {
-      this.color = 'blue'
-      console.log(this.color)
-    }
-  }
-}
+<script setup>
+import {
+  RadioGroup,
+  Radio,
+  Field,
+  Form,
+  Uploader,
+  Button,
+  Dialog,
+  Popup,
+  Calendar,
+  Picker,
+  Toast,
+} from "vant";
 </script>
 
-<style>
-.text {
-  color: v-bind(color);
-}
+<style lang="scss">
+
 </style>
