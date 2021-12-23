@@ -16,7 +16,7 @@
     "sass": "^1.45.1",
     "vant": "3",
     "vite": "^2.7.2",
-    "vite-plugin-style-import": "^0.10.0",
+    "vite-plugin-style-import": "^1.4.0",
     "vue-router": "^4.0.12"
   }
 }

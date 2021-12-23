@@ -4,8 +4,8 @@ import Form from '../pages/form.vue'
 
 const routers = [
     {
-        path: '/',
-        name: 'Transfer',
+        path: '/form',
+        name: 'form',
         component: Form
     },
     // {

@@ -28,7 +28,7 @@ onMounted(() => {
           <span>杭州市三川国德</span>
         </div>
         <div class="each-btn">
-          <Button type="success">下一步</Button>
+          <Button type="success" size="small">下一步</Button>
         </div>
       </div>
     </div>
