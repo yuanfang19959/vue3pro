@@ -6,6 +6,9 @@ const routers = [
     {
         path: '/form',
         name: 'form',
+        meta: {
+            title:'定期抄见'
+        },
         component: Form
     },
     // {
@@ -14,6 +17,9 @@ const routers = [
     {
         path: '/user',
         name: 'user',
+        meta: {
+            title:'户号'
+        },
         component: () => import('@/pages/userlist.vue')
     },
 ]

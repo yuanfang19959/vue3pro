@@ -5,6 +5,11 @@ import 'normalize.css'
 import { Button, Skeleton } from "vant";
 const app = createApp(App);
 
+router.beforeEach((to, from, next) => {
+   document.title = to.meta.title
+   next()
+})
+
 app.use(router)
 app.use(
     Button,
