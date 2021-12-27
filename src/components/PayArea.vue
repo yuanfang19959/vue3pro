@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, toRefs } from "vue";
+import { reactive, toRefs, watch, watchEffect } from "vue";
 import { Col, Row, Field } from "vant";
 
 defineProps({
@@ -7,11 +7,21 @@ defineProps({
 });
 
 const state = reactive({
-  money: 0,
+  money: 10,
   nowIndex: 0,
   list: [10, 15, 20, 25, 50, 100],
 });
 let { money, list, nowIndex } = toRefs(state);
+
+watch(money, (newVal, oldVal)  => {
+  if(!state.list.includes(Number(newVal))) {
+    nowIndex.value = 7
+  }
+})
+
+const payRightNow = () => {
+  alert("立即支付")
+}
 </script>
 
 <template>
@@ -27,7 +37,7 @@ let { money, list, nowIndex } = toRefs(state);
           :rules="[{ required: true, message: '请填写用户名' }]"
         >
           <template #button>
-            <div class="btn">立即缴费</div>
+            <div class="btn" @click="payRightNow">立即缴费</div>
           </template>
         </Field>
       </Col>
@@ -55,6 +65,14 @@ let { money, list, nowIndex } = toRefs(state);
 
 <style lang="scss" scoped>
 .money-input {
+   border-top: 20px solid #f3f3f3;
+  :deep(.van-field){
+    padding-left: 0!important;
+    input {
+      font-size: 28px;
+      color:#ecb23b;
+    }
+  }
   padding: 20px;
   .btn {
       color:rgb(25, 137, 250);

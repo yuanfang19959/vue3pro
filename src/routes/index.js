@@ -11,9 +11,9 @@ const routers = [
         },
         component: Form
     },
-    // {
-    //     redirect: '/user'
-    // },
+    {
+        redirect: '/form'
+    },
     {
         path: '/user',
         name: 'user',

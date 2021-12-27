@@ -1,5 +1,5 @@
 <template>
-  <div >
+  <div>
     <router-view />
   </div>
 </template>
@@ -8,5 +8,7 @@
 </script>
 
 <style>
-
+body {
+  max-width: 750px;
+}
 </style>
