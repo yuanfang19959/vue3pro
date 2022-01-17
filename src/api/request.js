@@ -30,7 +30,9 @@ function endLoading() {
 service.interceptors.request.use(
     config => {
         let token = getValue("token");
-        let target = { systemcode:"GD",accountType:"XJ",token, waterCorpId: 3, UNID: '', areaId: 0, apiType: 'APP', appVersion: '1.0.2',clientType:"iOS",htmlVersion:"1.0.4", }
+        token = "hDYS6jCGZ4EyYfKYw2gjPIaDJ-RlTXmDE6HguO2PNTYIR2NArNfvI5GbGsRzB6D1CqBsT611Awo2J-bG5oyl5g"
+        let openId = "omfiywkXVT-1OL5hlq2Q5huc-5CA";
+        let target = { openId,systemcode:"GD",accountType:"XJ",token, waterCorpId: 3, UNID: '', areaId: 0, apiType: 'JSAPI', appVersion: '1.0.2',clientType:"iOS",htmlVersion:"1.0.4", }
         let params = Object.assign(config.params, target)
         config.params = {
             requestPara: params

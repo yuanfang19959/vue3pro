@@ -141,14 +141,14 @@ const getFormData = () => {
   request({
     method: "POST",
     url: GETFORMINFO,
-    params: {
-      moduleId: 32,
-      waterCorpId: 3,
-      moduleName: "定期抄见",
-      systemcode: "GD",
-      flowcode: "autmeteraing",
-    },
-    // params:obj
+    // params: {
+    //   moduleId: 32,
+    //   waterCorpId: 3,
+    //   moduleName: "定期抄见",
+    //   systemcode: "GD",
+    //   flowcode: "autmeteraing",
+    // },
+    params:obj
   }).then((res) => {
     if (!res.status) {
       state.paramsList = res.data.moduleData.paramsList;
