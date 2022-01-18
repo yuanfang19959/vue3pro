@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import styleImport from 'vite-plugin-style-import';
+import styleImport, { VantResolve } from 'vite-plugin-style-import';
 const path = require('path')
 
 // https://vitejs.dev/config/
@@ -19,14 +19,9 @@ export default defineConfig({
     vue(),
     // 按需引入vant
     styleImport({
-      libs: [
-        {
-          libraryName: 'vant',
-          esModule: true,
-          resolveStyle: (name) => `vant/es/${name}/style/index`,
-        },
-      ],
-    })
+      resolves: [VantResolve()],
+    }),
+
   ],
   base: './',
   resolve: {

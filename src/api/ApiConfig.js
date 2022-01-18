@@ -24,3 +24,5 @@ export const PAY = '/iwater/v1/pay/nt/getPayRequestInfo/v3.json'
 
 // 检查支付状态
 export const CHECKORDERSTATUS = "/iwater/v1/shop/checkOrderStatus/v2.json"
+
+export const CREATE = "/iwatermgr/transactBusiness/nt/create.json"

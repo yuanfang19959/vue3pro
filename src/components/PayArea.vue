@@ -1,11 +1,12 @@
 <script setup>
-import { reactive, toRefs, watch, watchEffect } from "vue";
+import { onMounted, reactive, toRefs, watch, watchEffect, onBeforeUpdate } from "vue";
 import { Col, Row, Field, Dialog, Notify } from "vant";
 import request from "@/api/request";
 import { MARKORDER, PAY, CHECKORDERSTATUS } from "@/api/ApiConfig";
 
-defineProps({
-  msg: String,
+const props = defineProps({
+  arrearmoney:"",
+  obj:{}
 });
 
 const state = reactive({
@@ -21,6 +22,11 @@ watch(money, (newVal, oldVal) => {
     nowIndex.value = 7;
   }
 });
+
+onBeforeUpdate(() => {
+  state.money = props.arrearmoney || 10;
+  state.obj = props.obj
+})
 
 /**
  * 支付后弹窗验证
@@ -50,15 +56,20 @@ const payResult = (orderId) => {
  * 支付步骤一。下单
  */
 const markorder = () => {
+  let { money, obj } = state;
+  if(money <= 0) {
+    Notify({type:'danger', message:'请输入正确的金额'})
+    return;
+  }
   request({
     method: "POST",
     url: MARKORDER,
     params: {
-      meterNum: "100221810",
+      meterNum: obj.meterNumber,
       openInvoice: 0,
       areaId: 0,
-      money: "0.01",
-      mobile: "",
+      money,
+      mobile: obj.meterMobile,
       feeids: "",
     },
   }).then((res) => {
@@ -79,7 +90,7 @@ const paynow = (orderId) => {
       orderId,
       type: 2,
       payMethod: 2,
-      openId: "omfiywkXVT-1OL5hlq2Q5huc-5CA",
+      openId: localStorage.getItem("openId"),
     },
   }).then((res) => {
     if (!res.status) {
@@ -196,7 +207,7 @@ const onBridgeReady = (payData) => {
     font-family: PingFangSC-Regular, PingFang SC;
     font-weight: 400;
     color: #ffffff;
-    background: linear-gradient(138deg, rgba(0, 174, 126, 0.45) 0%, #00ae7e 100%);
+    background: linear-gradient(138deg, rgb(58 26 201 / 45%) 0%, #23709d 100%);
     border-radius: 8px;
   }
   .active {
