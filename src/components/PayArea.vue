@@ -90,7 +90,7 @@ const paynow = (orderId) => {
       orderId,
       type: 2,
       payMethod: 2,
-      openId: localStorage.getItem("openId"),
+      openId: localStorage.getItem("openId3") || localStorage.getItem("openId"),
     },
   }).then((res) => {
     if (!res.status) {

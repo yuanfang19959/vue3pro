@@ -31,7 +31,7 @@ export default defineConfig({
   },
   build: {
     target: 'modules',
-    outDir: 'dist',
+    outDir: 'dick',
     assetsDir: 'assets',
     minify: 'terser',
     terserOptions: {

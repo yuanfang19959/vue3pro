@@ -15,7 +15,7 @@
           <span>{{ v.meterAddress }}</span>
         </div>
         <div class="each-btn">
-          <Button type="success" size="small" @click="goPage(v)">下一步</Button>
+          <Button type="success" size="small" @click="checkStatus(v)">下一步</Button>
         </div>
       </div>
     </div>
@@ -23,23 +23,24 @@
 </template>
 
 <script setup>
-import { Button, Skeleton } from "vant";
+import { Button, Skeleton, Toast } from "vant";
 import { reactive, toRefs, onMounted } from "vue";
 import request from "@/api/request";
-import { GETMETERLIST } from "@/api/ApiConfig";
-import { useRouter } from "vue-router";
+import { GETMETERLIST, ISCONDITON } from "@/api/ApiConfig";
+import { useRouter, useRoute } from "vue-router";
 
 const state = reactive({
   loading: false,
   meterList: [],
 });
-const router = useRouter()
+const router = useRouter();
+const route = useRoute();
 let { meterList } = toRefs(state);
 
 onMounted(() => {
-  let k = localStorage.getItem('m');
-  if(k) {
-    state.meterList = JSON.parse(k)
+  let k = localStorage.getItem("m");
+  if (k) {
+    state.meterList = JSON.parse(k);
   } else {
     getMeterList();
   }
@@ -58,14 +59,31 @@ const getMeterList = () => {
     if (!res.status) {
       state.loading = false;
       state.meterList = res.data;
-      localStorage.setItem('m', JSON.stringify(res.data))
+      localStorage.setItem("m", JSON.stringify(res.data));
     }
   });
 };
 
-const goPage = (v) => {
-  localStorage.setItem('p', JSON.stringify(v))
-  router.push("/form?type=1");
+/**
+ * 检查用户状态
+ */
+const checkStatus = (v) => {
+  request({
+    url: ISCONDITON,
+    method: "get",
+    params: {
+      cardNo: v.meterNumber,
+    },
+  }).then((res) => {
+    let { message, data } = res;
+    let url = route.fullPath;
+    if(data === 'true') {
+      localStorage.setItem("p", JSON.stringify(v));
+      router.push(url.replace('user', 'form'));
+    } else {
+      Toast(message);
+    }
+  });
 };
 </script>
 

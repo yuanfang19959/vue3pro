@@ -11,7 +11,7 @@
         :readonly="f.isread"
         :name="f.paramsName"
         :label="f.leftText"
-        @click="showDiff(f)"
+        @click="showDiff(f, f.paramsName)"
         :rules="[
           {
             required: f.required,
@@ -37,7 +37,9 @@
       <div class="btn" @click="shows = true">?自报示例</div>
 
       <div class="bottom-btn">
-        <Button type="primary" size="large" round native-type="submit">提交</Button>
+        <Button type="primary" size="large" round native-type="submit" safe-area-inset-top
+          >提交</Button
+        >
       </div>
     </Form>
 
@@ -47,12 +49,23 @@
 
     <!-- 户号下拉start -->
     <Popup v-model:show="showPicker" position="bottom">
-      <Picker :columns="columns" @confirm="onConfirms" @cancel="showPicker = false" />
+      <Picker
+        :columns="columns"
+        @confirm="onConfirms"
+        @cancel="showPicker = false"
+        :columns-field-names="{ text: 'meterNumber' }"
+      />
     </Popup>
     <!-- 户号下拉end -->
 
     <!-- 日期选择start -->
-    <Calendar v-model:show="showCalendar" @confirm="onConfirm" color="#1989fa" />
+    <Calendar
+      v-model:show="showCalendar"
+      @confirm="onConfirm"
+      color="#1989fa"
+      ref="calendarRef"
+      :min-date="minDate"
+    />
     <!-- 日期选择end -->
 
     <!-- 示例弹窗start -->
@@ -85,68 +98,144 @@ import PayArea from "@/components/PayArea.vue";
 import request from "@/api/request";
 import { ajaxForm } from "@/api/ajaxForm";
 import { reactive, ref, toRefs, onMounted } from "vue";
-import { GETFORMINFO, GETPRICE, CREATE } from "@/api/ApiConfig";
-import { useRouter, useRoute, } from "vue-router";
+import {
+  GETFORMINFO,
+  GETPRICE,
+  CREATE,
+  GETMETERLIST,
+  FORMDATAR,
+  DEALBILL,
+} from "@/api/ApiConfig";
+import { useRouter, useRoute } from "vue-router";
 import moment from "moment";
+import Compressor from "compressorjs";
+import { blobToBase64 } from "@/utils/utils";
 
 const VanDialog = Dialog.Component;
 const state = reactive({
-  detailJson: {
-    arrearmoney: 0,
-  },
+  detailJson: {},
   paramsList: [],
   obj: {},
   fileList: [],
   attachList: [],
+  columns: [],
+  minDate: new Date(2021, 7, 1),
 });
-let { detailJson, paramsList, obj, fileList } = toRefs(state);
+let { detailJson, paramsList, obj, fileList, columns, minDate } = toRefs(state);
 const showCalendar = ref(false);
 const cardno = ref("");
 const showPicker = ref(false);
 const shows = ref(false);
 const noShow = ref(false);
-const columns = [10000, 10002, 10003];
 const route = useRoute();
+const result = ref("");
+const calendarRef = ref("");
+const calendarObj = ref("");
 
 onMounted(() => {
-  let p = localStorage.getItem("p");
-  if (p) {
-    state.obj = JSON.parse(p);
+  let { type, edit } = route.query;
+  // 编辑时start
+  if (edit) {
+    getFormRe(type);
+    return;
   }
-  if (route.query.type == 1) {
+  // 编辑时end
+
+  // 以下正常进入表单
+  if (type == 1) {
+    let p = localStorage.getItem("p");
+    if (p) {
+      state.obj = JSON.parse(p);
+    }
     noShow.value = true;
-    state.detailJson = {
-      cardno: state.obj.meterNumber,
-      lastreaddate: state.obj.nextreaddate,
-      nexttosq: state.obj.nextto,
-      nextreaddate: moment().format("yyyy-MM-DD"),
-    };
+    setObj(state.obj);
   }
-  getFormData();
+  getFormData(type);
 });
+
+const setObj = (obj) => {
+  state.detailJson = {
+    cardno: obj.meterNumber,
+    lastreaddate: obj.nextreaddate,
+    nexttosq: obj.nextto,
+    nextreaddate: moment().format("yyyy-MM-DD"),
+  };
+};
+
+/**
+ * 表单回显数据获取
+ */
+const getFormRe = (type) => {
+  request({
+    url: FORMDATAR,
+    method: "post",
+    params: {
+      ...route.query,
+    },
+  }).then((res) => {
+    if (!res.status) {
+      Object.assign(state.detailJson, res.datainfo.moduleData);
+      state.fileList = res.fileList;
+      state.paramsList = res.data.moduleData.paramsList;
+      console.log(res.fileList);
+      state.attachList = [
+        {
+          filetype: "sbdschj",
+          files: [
+            {
+              filesuffix: res.fileList[0].filetype,
+              filecontent: "",
+              fileid: res.fileList[0].fileid,
+            },
+          ],
+        },
+      ];
+      getMeterList(state.detailJson.cardno);
+      if (type == 2) {
+        state.paramsList.map((v) => {
+          if (v.paramsName === "cardno") {
+            v.type = "select";
+          }
+        });
+      }
+    }
+  });
+};
 
 /**
  * 删除照片
  */
-const deletePicture = () =>{
-  state.attachList = []
-}
+const deletePicture = () => {
+  state.attachList = [];
+};
+
 /**
  * 读取上传内容
  */
-const afterRead = ({ content }) => {
-  state.attachList = [
-    {
-      filetype: "sbdschj",
-      files: [
-        {
-          filesuffix: "png",
-          filecontent: content.replace("data:image/png;base64,", ""),
-          fileid: "",
-        },
-      ],
+const afterRead = ({ file, content }) => {
+  new Compressor(file, {
+    quality: 0.3,
+    convertTypes:['image/png','image/jpeg'],
+    success(result) {
+      blobToBase64(result).then((rs) => {
+        state.attachList = [
+          {
+            filetype: "sbdschj",
+            files: [
+              {
+                filesuffix: file.type.split("/")[1],
+                filecontent: rs
+                  .replace("data:image/png;base64,", "")
+                  .replace("data:image/jpeg;base64,", "")
+                  .replace("data:image/jpg;base64,", ""),
+                fileid: "",
+              },
+            ],
+          },
+        ];
+      });
     },
-  ];
+  });
 };
 
 const special = (val, rule) => {
@@ -166,18 +255,21 @@ const special = (val, rule) => {
 /**
  * 日期选择确认
  */
-const onConfirm = (date) => {
-  result.value = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+const onConfirm = (date, v) => {
+  state.detailJson[calendarObj.value] = `${date.getFullYear()}-${
+    date.getMonth() + 1
+  }-${date.getDate()}`;
   showCalendar.value = false;
-  console.log(result.value);
 };
 
 /**
  * 户号选择确认
  */
 const onConfirms = (value) => {
-  cardno.value = value;
+  state.detailJson.cardno = value.meterNumber;
+  state.obj = value;
   showPicker.value = false;
+  setObj(value);
 };
 
 /**
@@ -185,31 +277,33 @@ const onConfirms = (value) => {
  */
 const onSubmit = (values) => {
   let { detailJson, attachList } = state;
-  if(!attachList.length) {
-    Toast("请上传水表读数照片")
+  if (!attachList.length) {
+    Toast("请上传水表读数照片");
     return;
   }
   let kkp = {
-    type: route.query.moduleId,
+    type: route.query.moduleId || "0",
     title: route.query.moduleName,
     flowcode: route.query.flowcode,
   };
 
   ajaxForm({
-    url: CREATE,
+    url: !route.query.edit ? CREATE : DEALBILL,
     base: "",
     type: "POST",
     params: {
       ...kkp,
       detailJson: JSON.stringify(detailJson),
       attachList,
-      subType:"",
-      columnname:"photoFile",
+      processid: detailJson.processid,
+      billno: detailJson.billno,
+      subType: "",
+      columnname: "photoFile",
     },
     successFn: (res) => {
       let { message } = res;
-        Toast(message)
-      if(!res.status) {
+      Toast(message);
+      if (!res.status) {
       } else {
       }
     },
@@ -217,29 +311,54 @@ const onSubmit = (values) => {
 };
 
 /**
+ * 获取户号列表
+ */
+const getMeterList = (cardno) => {
+  request({
+    url: GETMETERLIST,
+    method: "post",
+    params: {},
+  }).then((res) => {
+    if (!res.status) {
+      state.columns = res.data;
+      if (cardno) {
+        console.log(cardno);
+        let obj = res.data.find((v) => {
+          return v.meterNumber == cardno;
+        });
+        state.obj = obj;
+      }
+    }
+  });
+};
+
+/**
  * 获取表单渲染数据
  */
-const getFormData = () => {
+const getFormData = (type) => {
   let obj = {
-    moduleId: 33,
-    moduleName: "随机抄见",
-    systemcode: "GD",
-    flowcode: "randomautmeteraing",
+    ...route.query,
   };
   document.title = obj.moduleName;
   request({
     method: "POST",
     url: GETFORMINFO,
-    // params: {
-    //   moduleId: 32,
-    //   moduleName: "定期抄见",
-    //   systemcode: "GD",
-    //   flowcode: "autmeteraing",
-    // },
-    params: obj,
+    params: {
+      ...obj,
+    },
   }).then((res) => {
     if (!res.status) {
       state.paramsList = res.data.moduleData.paramsList;
+      if (type == 2) {
+        state.paramsList.map((v) => {
+          if (v.paramsName === "cardno") {
+            v.type = "select";
+          }
+        });
+        if (!state.columns.length) {
+          getMeterList();
+        }
+      }
     }
   });
 };
@@ -248,8 +367,15 @@ const getFormData = () => {
  * 根据不同的点击显示不同的内容
  * @param {Object} v 数组传来的对象
  */
-const showDiff = (v) => {
+const showDiff = (v, params) => {
+  let { detailJson } = state;
   if (v.type === "date") {
+    calendarObj.value = params;
+    let formatD = detailJson[v.paramsName];
+    if (formatD) {
+      let [y, m, d] = formatD.split("-");
+      calendarRef.value.reset(new Date(y, Number(m) - 1, d));
+    }
     showCalendar.value = true;
   } else if (v.paramsName === "cardno" && !noShow.value) {
     showPicker.value = true;

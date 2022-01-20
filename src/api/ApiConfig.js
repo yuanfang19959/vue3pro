@@ -3,7 +3,7 @@
  * import.meta.env.MODE 为vite获取环变量方式
  * @returns 
  */
- const BASE = () => {
+const BASE = () => {
     return import.meta.env.MODE === 'development' ? "/api" : "http://service.fjlyzls.com"
 }
 export const BASEURL = BASE();
@@ -26,3 +26,9 @@ export const PAY = '/iwater/v1/pay/nt/getPayRequestInfo/v3.json'
 export const CHECKORDERSTATUS = "/iwater/v1/shop/checkOrderStatus/v2.json"
 
 export const CREATE = "/iwatermgr/transactBusiness/nt/create.json"
+
+export const FORMDATAR = '/iwatermgr/transactBusiness/nt/getFormInfodata.json'
+
+export const DEALBILL = '/iwatermgr/transactBusiness/dealBill.json'
+
+export const ISCONDITON = '/iwatermgr/transactBusiness/checkMeterCondition.json'
