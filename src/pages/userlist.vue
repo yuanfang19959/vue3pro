@@ -38,12 +38,12 @@ const route = useRoute();
 let { meterList } = toRefs(state);
 
 onMounted(() => {
-  let k = localStorage.getItem("m");
-  if (k) {
-    state.meterList = JSON.parse(k);
-  } else {
+  // let k = localStorage.getItem("m");
+  // if (k) {
+  //   state.meterList = JSON.parse(k);
+  // } else {
     getMeterList();
-  }
+  // }
 });
 
 /**
